@@ -525,6 +525,7 @@ class Nse:
             self.option_mode_btn.config(text='Index')
             self.index_menu.config(state='readonly')
             self.stock_menu.config(state=DISABLED)
+        self.get_data()
 
         self.config_parser.set('main', 'option_mode', f'{self.option_mode}')
         with open('NSE-OCA.ini', 'w') as f:
