@@ -5,12 +5,14 @@ import os
 import platform
 import sys
 import time
+import warnings
 import webbrowser
 from tkinter import Tk, Toplevel, Event, TclError, StringVar, Frame, Menu, Label, Entry, SOLID, RIDGE, \
     DISABLED, NORMAL, N, S, E, W, LEFT, messagebox, PhotoImage
 from tkinter.ttk import Combobox, Button
 from typing import Union, Optional, List, Dict, Tuple, TextIO, Any
 
+warnings.simplefilter(action='ignore', category=FutureWarning)
 import pandas
 import requests
 import streamtologger
