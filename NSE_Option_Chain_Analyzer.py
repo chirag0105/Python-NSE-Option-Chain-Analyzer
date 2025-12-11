@@ -39,9 +39,12 @@ class Nse:
         self.dates: List[str] = [""]
         self.indices: List[str] = []
         self.stocks: List[str] = []
+        self.expiry_date: str = ""
         self.url_oc: str = "https://www.nseindia.com/option-chain"
-        self.url_index: str = "https://www.nseindia.com/api/option-chain-indices?symbol="
-        self.url_stock: str = "https://www.nseindia.com/api/option-chain-equities?symbol="
+        self.url_index: str = "https://www.nseindia.com/api/option-chain-contract-info?symbol="
+        self.url_stock: str = "https://www.nseindia.com/api/option-chain-contract-info?symbol="
+        self.url_index_data: str = "https://www.nseindia.com/api/option-chain-v3?type=Indices&symbol={}&expiry={}"
+        self.url_stock_data: str = "https://www.nseindia.com/api/option-chain-v3?type=Equity&symbol={}&expiry={}"
         self.url_symbols: str = "https://www.nseindia.com/api/underlying-information"
         self.url_icon_png: str = "https://raw.githubusercontent.com/VarunS2002/" \
                                  "Python-NSE-Option-Chain-Analyzer/master/nse_logo.png"
@@ -332,6 +335,9 @@ class Nse:
             self.config_parser.write(f)
 
         url: str = self.url_index + self.index if self.option_mode == 'Index' else self.url_stock + self.stock
+        if self.expiry_date != "":
+            url: str = self.url_index_data.format(self.index, self.expiry_date) if self.option_mode == 'Index' \
+                else self.url_stock_data.format(self.stock, self.expiry_date)
         try:
             response = self.session.get(url, headers=self.headers, timeout=5, cookies=self.cookies)
         except Exception as err:
@@ -364,7 +370,9 @@ class Nse:
                 print(err, sys.exc_info()[0], "3")
             return
         self.dates.clear()
-        for dates in json_data['records']['expiryDates']:
+        expiry_dates_list: List[str] = json_data['expiryDates'] if 'expiryDates' in json_data \
+            else json_data['records']['expiryDates']
+        for dates in expiry_dates_list:
             self.dates.append(dates)
         try:
             self.date_menu.config(values=tuple(self.dates))
@@ -377,7 +385,8 @@ class Nse:
     def get_data_refresh(self) -> Optional[Tuple[Optional[requests.Response], Any]]:
         request: Optional[requests.Response] = None
         response: Optional[requests.Response] = None
-        url: str = self.url_index + self.index if self.option_mode == 'Index' else self.url_stock + self.stock
+        url: str = self.url_index_data.format(self.index, self.expiry_date) if self.option_mode == 'Index' \
+            else self.url_stock_data.format(self.stock, self.expiry_date)
         try:
             response = self.session.get(url, headers=self.headers, timeout=5, cookies=self.cookies)
             if response.status_code == 401:
@@ -1055,9 +1064,9 @@ class Nse:
         df = df.transpose()
 
         ce_values: List[dict] = [data['CE'] for data in json_data['records']['data'] if
-                                 "CE" in data and data['expiryDate'].lower() == self.expiry_date.lower()]
+                                 "CE" in data and data['expiryDates'].lower() == self.expiry_date.lower()]
         pe_values: List[dict] = [data['PE'] for data in json_data['records']['data'] if
-                                 "PE" in data and data['expiryDate'].lower() == self.expiry_date.lower()]
+                                 "PE" in data and data['expiryDates'].lower() == self.expiry_date.lower()]
         points: float = pe_values[0]['underlyingValue']
         if points == 0:
             for item in pe_values:
@@ -1073,10 +1082,11 @@ class Nse:
             self.change_state()
             return
         columns_ce: List[str] = ['openInterest', 'changeinOpenInterest', 'totalTradedVolume', 'impliedVolatility',
-                                 'lastPrice',
-                                 'change', 'bidQty', 'bidprice', 'askPrice', 'askQty', 'strikePrice']
-        columns_pe: List[str] = ['strikePrice', 'bidQty', 'bidprice', 'askPrice', 'askQty', 'change', 'lastPrice',
-                                 'impliedVolatility', 'totalTradedVolume', 'changeinOpenInterest', 'openInterest']
+                                 'lastPrice', 'change', 'buyQuantity1', 'buyPrice1', 'sellPrice1', 'sellQuantity1',
+                                 'strikePrice']
+        columns_pe: List[str] = ['strikePrice', 'buyQuantity1', 'buyPrice1', 'sellPrice1', 'sellQuantity1', 'change',
+                                 'lastPrice', 'impliedVolatility', 'totalTradedVolume', 'changeinOpenInterest',
+                                 'openInterest']
         ce_data_f = ce_data_f[columns_ce]
         pe_data_f = pe_data_f[columns_pe]
         merged_inner: pandas.DataFrame = pandas.merge(left=ce_data_f, right=pe_data_f, left_on='strikePrice',
