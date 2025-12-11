@@ -2,6 +2,22 @@
 
 <br>
 
+> # [5.7](https://github.com/VarunS2002/Python-NSE-Option-Chain-Analyzer/releases/tag/5.7)
+
+## Bug Fix Update
+
+- Bug Fixes:
+    - Fixed crash caused by multiple changes in the API endpoints and response structures.
+      This is what causes the "Error in fetching dates.Please retry." error.
+      Issue: [#79](https://github.com/VarunS2002/Python-NSE-Option-Chain-Analyzer/issues/79)
+    - Fixed incorrect expiry dates being shown in the dropdown when you switch between Index and Stock mode
+- Code changes:
+    - Ignored pandas deprecation warning as the version in `requirements.txt` is capped
+- Executable changes:
+    - Updated some libraries bundled with the `.exe` file
+
+<br>
+
 > # [5.6](https://github.com/VarunS2002/Python-NSE-Option-Chain-Analyzer/releases/tag/5.6)
 
 ## Bug Fix Update
