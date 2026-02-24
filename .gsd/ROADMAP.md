@@ -17,7 +17,7 @@
 **Requirements**: REQ-01, REQ-06
 
 ### Phase 2: Live Data Streaming (WebSockets)
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Implement WebSockets in backend, set up in-memory cache holding the latest data states and broadcast logic.
 **Requirements**: REQ-03, REQ-06
 
