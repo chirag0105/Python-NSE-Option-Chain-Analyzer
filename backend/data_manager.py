@@ -30,6 +30,13 @@ class DataManager:
         self.latest_chains[symbol] = data
         logger.debug(f"Updated cache for {symbol}")
 
+    def sync_tracked_symbols(self, tracked_symbols: set):
+        """Remove symbols from cache that are no longer being tracked."""
+        stale = [s for s in self.latest_chains if s not in tracked_symbols]
+        for s in stale:
+            del self.latest_chains[s]
+            self.analytics_history.pop(s, None)
+
     def get_chain(self, symbol: str):
         return self.latest_chains.get(symbol)
 

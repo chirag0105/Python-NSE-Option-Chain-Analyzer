@@ -18,6 +18,10 @@ async def background_poll():
         try:
             config = await ConfigManager.load_config()
             interval = config.refresh_interval
+
+            # Prune symbols that are no longer tracked
+            tracked_symbols = {script.symbol for script in config.tracked_scripts}
+            data_manager.sync_tracked_symbols(tracked_symbols)
             
             for script in config.tracked_scripts:
                 try:
