@@ -6,6 +6,8 @@ from backend.routers import api_router
 from backend.config_manager import ConfigManager
 from backend.data_manager import data_manager
 from backend.nse_client import nse_client
+from backend.data_processor import DataProcessor
+from backend.websocket_manager import manager
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -20,10 +22,13 @@ async def background_poll():
                 try:
                     logger.info(f"Fetching option chain for {script.symbol}")
                     data = await nse_client.fetch_option_chain(script.symbol, script.type)
-                    data_manager.update_chain(script.symbol, data)
+                    processed = DataProcessor.process_chain(data, limit_strikes=20)
+                    processed["symbol"] = script.symbol
+                    data_manager.update_chain(script.symbol, processed)
                 except Exception as e:
                     logger.error(f"Failed to fetch {script.symbol}: {e}")
             
+            await manager.broadcast({"type": "update", "data": data_manager.latest_chains})
             await asyncio.sleep(interval)
         except asyncio.CancelledError:
             logger.info("Background polling task cancelled.")
