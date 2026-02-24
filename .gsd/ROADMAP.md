@@ -12,7 +12,7 @@
 ## Phases
 
 ### Phase 1: Foundation (Backend & API)
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Build out FastAPI backend service to manage configurations, background data fetching to NSE, and exposing endpoints for available symbols/expiry dates.
 **Requirements**: REQ-01, REQ-06
 
