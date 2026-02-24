@@ -259,3 +259,42 @@ h3 {
 .options-table tr:hover {
     background: rgba(255, 255, 255, 0.03);
 }
+
+/* Detail Modal Expand UX */
+.detail-panel {
+    max-width: 900px;
+    max-height: 90vh;
+    animation: slideUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.detail-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--card-border);
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+}
+
+.detail-header h2 {
+    font-size: 2rem;
+    color: var(--text-primary);
+}
+
+.detail-atm-row {
+    background: rgba(59, 130, 246, 0.15) !important;
+    border-left: 3px solid var(--accent-blue);
+    position: relative;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(40px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

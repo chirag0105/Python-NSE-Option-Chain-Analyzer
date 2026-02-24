@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", init);
 
 let ws;
 const REFRESH_INTERVAL = 10; // Default
+let openDetailSymbol = null; // Track which symbol's detail modal is open
 
 async function init() {
     setupUIBindings();
@@ -41,6 +42,13 @@ function setupUIBindings() {
 
         if (!ws || ws.readyState !== WebSocket.OPEN) {
             connectWebSocket();
+        }
+    });
+
+    document.getElementById("close-detail-btn").addEventListener("click", closeDetailModal);
+    document.getElementById("detail-modal").addEventListener("click", (e) => {
+        if (e.target.id === "detail-modal") {
+            closeDetailModal();
         }
     });
 }
@@ -130,6 +138,10 @@ function connectWebSocket() {
             for (const [symbol, data] of Object.entries(payload.data)) {
                 if (Object.keys(data).length > 0) {
                     updateOrBuildCard(symbol, data);
+
+                    if (openDetailSymbol === symbol) {
+                        updateDetailModalLive(symbol, data);
+                    }
                 }
             }
         }
@@ -176,7 +188,7 @@ function updateOrBuildCard(symbol, data) {
     }
 
     card.innerHTML = `
-        <div class="card-header">
+        <div class="card-header" onclick="openDetailModal('${symbol}')" style="cursor: pointer;">
             <h2>${symbol}</h2>
             <div class="underlying-value">₹${data.underlyingValue}</div>
         </div>
@@ -199,4 +211,69 @@ function updateOrBuildCard(symbol, data) {
             </tbody>
         </table>
     `;
+}
+
+async function openDetailModal(symbol) {
+    openDetailSymbol = symbol;
+
+    // UI Setup before fetch finishes
+    document.getElementById("detail-symbol-name").textContent = symbol;
+    document.getElementById("detail-table-body").innerHTML = `<tr><td colspan="5" style="text-align: center;">Loading deep chain...</td></tr>`;
+    document.getElementById("detail-modal").classList.remove("hidden");
+
+    try {
+        const res = await fetch(`/api/chain/${symbol}`);
+        if (!res.ok) {
+            console.error("Failed to load detailed chain");
+            return;
+        }
+        const data = await res.json();
+        updateDetailModalLive(symbol, data);
+    } catch (e) {
+        console.error("Error fetching detailed chain", e);
+    }
+}
+
+function updateDetailModalLive(symbol, data) {
+    if (openDetailSymbol !== symbol) return;
+
+    document.getElementById("detail-expiry").textContent = `Expiry: ${data.expiryDate}`;
+    document.getElementById("detail-timestamp").textContent = data.timestamp;
+    document.getElementById("detail-underlying").textContent = `₹${data.underlyingValue}`;
+
+    populateDetailTable(data);
+}
+
+function populateDetailTable(data) {
+    const tbody = document.getElementById("detail-table-body");
+    let html = '';
+
+    if (data.options_data && Array.isArray(data.options_data)) {
+        // Assume ATM is closest strike
+        const atmStrike = data.options_data.reduce((prev, curr) =>
+            Math.abs(curr.strikePrice - data.underlyingValue) < Math.abs(prev.strikePrice - data.underlyingValue) ? curr : prev
+        ).strikePrice;
+
+        data.options_data.forEach(row => {
+            const isAtm = row.strikePrice === atmStrike;
+            const trClass = isAtm ? 'class="detail-atm-row"' : '';
+
+            html += `
+                <tr ${trClass}>
+                    <td class="pe-data">${row.CE.openInterest} <span style="font-size: 0.7em; opacity: 0.7;">(${row.CE.changeinOpenInterest})</span></td>
+                    <td class="pe-data">${row.CE.lastPrice}</td>
+                    <td class="strike-price">${row.strikePrice}</td>
+                    <td class="ce-data">${row.PE.lastPrice}</td>
+                    <td class="ce-data">${row.PE.openInterest} <span style="font-size: 0.7em; opacity: 0.7;">(${row.PE.changeinOpenInterest})</span></td>
+                </tr>
+            `;
+        });
+    }
+
+    tbody.innerHTML = html;
+}
+
+function closeDetailModal() {
+    openDetailSymbol = null;
+    document.getElementById("detail-modal").classList.add("hidden");
 }

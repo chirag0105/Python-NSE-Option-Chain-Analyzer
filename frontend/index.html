@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NSE Option Chain Analyzer</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <div id="app">
         <header>
@@ -38,9 +42,39 @@
                 </div>
             </div>
         </div>
+        <div id="detail-modal" class="modal hidden">
+            <div class="modal-content glass-panel detail-panel">
+                <div class="detail-header">
+                    <h2 id="detail-symbol-name">Symbol</h2>
+                    <button id="close-detail-btn" class="btn">✕</button>
+                </div>
+                <div class="detail-meta card-meta">
+                    <span id="detail-expiry">Expiry: ...</span>
+                    <span id="detail-timestamp" class="timestamp">...</span>
+                    <span class="underlying-value" id="detail-underlying">₹...</span>
+                </div>
+                <div class="modal-body">
+                    <table id="detail-table" class="options-table detail-table">
+                        <thead>
+                            <tr>
+                                <th>Call OI</th>
+                                <th>Call LTP</th>
+                                <th class="strike-col">Strike</th>
+                                <th>Put LTP</th>
+                                <th>Put OI</th>
+                            </tr>
+                        </thead>
+                        <tbody id="detail-table-body">
+                            <!-- Rows injected via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
-    
+
     <!-- Empty js file for now -->
     <script src="app.js"></script>
 </body>
+
 </html>
