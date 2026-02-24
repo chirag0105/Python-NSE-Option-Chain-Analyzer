@@ -298,3 +298,94 @@ h3 {
         opacity: 1;
     }
 }
+
+/* UX Polish: Badge & Skeleton */
+.ws-badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.ws-badge.live {
+    color: var(--positive);
+    text-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+    animation: pulseGlow 2s infinite;
+}
+
+.ws-badge.disconnected {
+    color: var(--negative);
+}
+
+@keyframes pulseGlow {
+    0% {
+        opacity: 0.8;
+    }
+
+    50% {
+        opacity: 1;
+        text-shadow: 0 0 12px rgba(16, 185, 129, 0.8);
+    }
+
+    100% {
+        opacity: 0.8;
+    }
+}
+
+.skeleton {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px;
+}
+
+@keyframes shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    header {
+        padding: 1rem 1.5rem;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+        padding: 1.5rem 1rem;
+        gap: 1rem;
+    }
+
+    .modal-content {
+        width: 95%;
+        max-height: 85vh;
+    }
+
+    .options-table {
+        font-size: 0.8rem;
+    }
+
+    h1 {
+        font-size: 1.2rem;
+    }
+
+    .underlying-value {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 480px) {
+
+    .options-table th:nth-child(1),
+    .options-table th:nth-child(5),
+    .options-table td:nth-child(1),
+    .options-table td:nth-child(5) {
+        display: none;
+    }
+}

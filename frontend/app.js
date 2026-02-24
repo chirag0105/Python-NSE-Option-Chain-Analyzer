@@ -130,6 +130,8 @@ function connectWebSocket() {
 
     ws.onopen = () => {
         console.log("WebSocket connected");
+        document.getElementById('ws-status').className = 'ws-badge live';
+        document.getElementById('ws-status').textContent = '● Live';
     };
 
     ws.onmessage = (event) => {
@@ -149,6 +151,8 @@ function connectWebSocket() {
 
     ws.onclose = () => {
         console.log("WebSocket disconnected, attempting to reconnect...");
+        document.getElementById('ws-status').className = 'ws-badge disconnected';
+        document.getElementById('ws-status').textContent = '● Disconnected';
         setTimeout(() => connectWebSocket(), 5000);
     };
 
@@ -165,6 +169,7 @@ function updateOrBuildCard(symbol, data) {
         card = document.createElement("div");
         card.id = `card-${symbol}`;
         card.className = "card";
+        card.innerHTML = `<div class="skeleton" style="height: 250px; width: 100%;"></div>`;
         container.appendChild(card);
     } else {
         card.classList.remove("flash");

@@ -16,7 +16,10 @@
 <body>
     <div id="app">
         <header>
-            <h1>NSE Option Analyzer</h1>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <h1>NSE Option Analyzer</h1>
+                <span id="ws-status" class="ws-badge disconnected">● Disconnected</span>
+            </div>
             <button id="configure-btn" class="btn">Configure Symbols</button>
         </header>
 
