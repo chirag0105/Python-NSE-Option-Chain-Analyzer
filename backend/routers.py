@@ -1,4 +1,4 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, HTTPException
 from backend.config_manager import ConfigManager
 from backend.models import AppConfig
 from backend.nse_client import nse_client
@@ -42,3 +42,10 @@ async def websocket_endpoint(websocket: WebSocket):
             data = await websocket.receive_text()
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+
+@api_router.get("/chain/{symbol}")
+async def get_chain(symbol: str):
+    data = data_manager.latest_chains.get(symbol)
+    if data:
+        return data
+    raise HTTPException(status_code=404, detail="Symbol not yet available. Try again shortly.")
