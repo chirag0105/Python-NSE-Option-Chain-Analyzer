@@ -260,7 +260,91 @@ function updateDetailModalLive(symbol, data) {
     document.getElementById("detail-timestamp").textContent = data.timestamp;
     document.getElementById("detail-underlying").textContent = `₹${data.underlyingValue}`;
 
+    if (data.analytics) {
+        const a = data.analytics;
+        const oiLabel = document.getElementById("analytics-oi-label");
+        if (a.call_sum >= a.put_sum) {
+            oiLabel.textContent = "Bearish";
+            oiLabel.style.color = "#e53935";
+        } else {
+            oiLabel.textContent = "Bullish";
+            oiLabel.style.color = "#00e676";
+        }
+
+        const pcrLabel = document.getElementById("analytics-pcr");
+        pcrLabel.textContent = a.pcr;
+        pcrLabel.style.color = a.pcr < 1 ? "#e53935" : "#00e676";
+
+        document.getElementById("analytics-call-boundary").textContent = a.call_boundary;
+        document.getElementById("analytics-put-boundary").textContent = a.put_boundary;
+        document.getElementById("analytics-call-itm").textContent = a.call_itm;
+        document.getElementById("analytics-put-itm").textContent = a.put_itm;
+
+        const callExitsLabel = document.getElementById("analytics-call-exits");
+        callExitsLabel.textContent = a.call_exits;
+        callExitsLabel.style.color = a.call_exits === "Yes" ? "#e53935" : "inherit";
+
+        const putExitsLabel = document.getElementById("analytics-put-exits");
+        putExitsLabel.textContent = a.put_exits;
+        putExitsLabel.style.color = a.put_exits === "Yes" ? "#00e676" : "inherit";
+    }
+
+    populateHistoryTable(data.history);
     populateDetailTable(data);
+}
+
+function populateHistoryTable(historyData) {
+    const tbody = document.getElementById("history-table-body");
+    if (!tbody || !historyData) return;
+
+    let html = "";
+
+    historyData.forEach((row, idx) => {
+        let valColor = "inherit", callSumColor = "inherit", putSumColor = "inherit";
+        let diffColor = "inherit", callBoundColor = "inherit", putBoundColor = "inherit";
+        let callItmColor = "inherit", putItmColor = "inherit";
+
+        if (idx > 0) {
+            const prev = historyData[idx - 1];
+
+            const getColor = (curr, prev) => {
+                if (curr > prev) return "#00e676";
+                if (curr < prev) return "#e53935";
+                return "inherit";
+            };
+
+            valColor = getColor(row.underlyingValue, prev.underlyingValue);
+
+            if (row.analytics && prev.analytics) {
+                callSumColor = getColor(row.analytics.call_sum, prev.analytics.call_sum);
+                putSumColor = getColor(row.analytics.put_sum, prev.analytics.put_sum);
+                diffColor = getColor(row.analytics.difference, prev.analytics.difference);
+                callBoundColor = getColor(row.analytics.call_boundary, prev.analytics.call_boundary);
+                putBoundColor = getColor(row.analytics.put_boundary, prev.analytics.put_boundary);
+                callItmColor = getColor(row.analytics.call_itm, prev.analytics.call_itm);
+                putItmColor = getColor(row.analytics.put_itm, prev.analytics.put_itm);
+            }
+        }
+
+        const a = row.analytics || {};
+        const timeStr = row.timestamp ? row.timestamp.split(" ")[1] || row.timestamp : "--";
+
+        html += `
+            <tr>
+                <td>${timeStr}</td>
+                <td style="color: ${valColor}">${row.underlyingValue || "--"}</td>
+                <td style="color: ${callSumColor}">${a.call_sum ?? "--"}</td>
+                <td style="color: ${putSumColor}">${a.put_sum ?? "--"}</td>
+                <td style="color: ${diffColor}">${a.difference ?? "--"}</td>
+                <td style="color: ${callBoundColor}">${a.call_boundary ?? "--"}</td>
+                <td style="color: ${putBoundColor}">${a.put_boundary ?? "--"}</td>
+                <td style="color: ${callItmColor}">${a.call_itm ?? "--"}</td>
+                <td style="color: ${putItmColor}">${a.put_itm ?? "--"}</td>
+            </tr>
+        `;
+    });
+
+    tbody.innerHTML = html;
 }
 
 function populateDetailTable(data) {

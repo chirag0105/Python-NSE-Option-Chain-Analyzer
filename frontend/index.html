@@ -57,6 +57,26 @@
                     <span class="underlying-value" id="detail-underlying">₹...</span>
                 </div>
                 <div class="modal-body">
+                    <div class="history-container glass-panel"
+                        style="margin-bottom: 2rem; overflow-x: auto; max-height: 250px;">
+                        <table id="history-table" class="options-table">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Value</th>
+                                    <th>Call Sum</th>
+                                    <th>Put Sum</th>
+                                    <th>Difference</th>
+                                    <th>Call Boundary</th>
+                                    <th>Put Boundary</th>
+                                    <th>Call ITM</th>
+                                    <th>Put ITM</th>
+                                </tr>
+                            </thead>
+                            <tbody id="history-table-body">
+                            </tbody>
+                        </table>
+                    </div>
                     <table id="detail-table" class="options-table detail-table">
                         <thead>
                             <tr>
@@ -71,6 +91,58 @@
                             <!-- Rows injected via JS -->
                         </tbody>
                     </table>
+
+                    <div class="analytics-panel"
+                        style="margin-top: 1.5rem; display: flex; flex-direction: column; gap: 1rem;">
+                        <div class="analytics-row" style="display: flex; gap: 1rem; justify-content: space-between;">
+                            <div class="analytics-metric glass-panel"
+                                style="flex: 1; text-align: center; padding: 1rem;">
+                                <h4>Open Interest</h4>
+                                <div id="analytics-oi-label" class="metric-value">--</div>
+                            </div>
+                            <div class="analytics-metric glass-panel"
+                                style="flex: 1; text-align: center; padding: 1rem;">
+                                <h4>PCR</h4>
+                                <div id="analytics-pcr" class="metric-value">--</div>
+                            </div>
+                        </div>
+                        <div class="analytics-row" style="display: flex; gap: 1rem; justify-content: space-between;">
+                            <div class="analytics-metric glass-panel"
+                                style="flex: 1; text-align: center; padding: 1rem;">
+                                <h4>Call Boundary</h4>
+                                <div id="analytics-call-boundary" class="metric-value">--</div>
+                            </div>
+                            <div class="analytics-metric glass-panel"
+                                style="flex: 1; text-align: center; padding: 1rem;">
+                                <h4>Put Boundary</h4>
+                                <div id="analytics-put-boundary" class="metric-value">--</div>
+                            </div>
+                        </div>
+                        <div class="analytics-row" style="display: flex; gap: 1rem; justify-content: space-between;">
+                            <div class="analytics-metric glass-panel"
+                                style="flex: 1; text-align: center; padding: 1rem;">
+                                <h4>Call ITM</h4>
+                                <div id="analytics-call-itm" class="metric-value">--</div>
+                            </div>
+                            <div class="analytics-metric glass-panel"
+                                style="flex: 1; text-align: center; padding: 1rem;">
+                                <h4>Put ITM</h4>
+                                <div id="analytics-put-itm" class="metric-value">--</div>
+                            </div>
+                        </div>
+                        <div class="analytics-row" style="display: flex; gap: 1rem; justify-content: space-between;">
+                            <div class="analytics-metric glass-panel"
+                                style="flex: 1; text-align: center; padding: 1rem;">
+                                <h4>Call Exits</h4>
+                                <div id="analytics-call-exits" class="metric-value">--</div>
+                            </div>
+                            <div class="analytics-metric glass-panel"
+                                style="flex: 1; text-align: center; padding: 1rem;">
+                                <h4>Put Exits</h4>
+                                <div id="analytics-put-exits" class="metric-value">--</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

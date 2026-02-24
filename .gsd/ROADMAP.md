@@ -6,8 +6,8 @@
 ## Must-Haves (Milestone 1.1)
 - [x] Backend extracts or calculates Call Sum, Put Sum, Difference, Call Boundary, Put Boundary, Call ITM, Put ITM, PCR.
 - [x] Backend tracks the historical points throughout the day as a time-series.
-- [ ] Frontend displays the time-series logs in a table view.
-- [ ] Frontend displays the Bullish/Bearish layout matching the old GUI (Open Interest Boundaries, Call/Put Exits, etc).
+- [x] Frontend displays the time-series logs in a table view.
+- [x] Frontend displays the Bullish/Bearish layout matching the old GUI (Open Interest Boundaries, Call/Put Exits, etc).
 
 ## Phases (Milestone 1.1)
 
@@ -20,7 +20,7 @@
 **Objective**: Enhance the WebSocket broadcast payload to carry both the live option chain frame and the historical analytics arrays for the user's active symbols.
 
 ### Phase 3: GUI Analytics Dashboard
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Implement the bottom table log and the summary indicator panel for Open Interest Boundaries, PCR, and Market Exits.
 
 ---
