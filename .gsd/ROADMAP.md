@@ -1,7 +1,10 @@
 # ROADMAP.md
 
 > **Current Phase**: Not started
-> **Milestone**: v1.1 (Analytical Engine)
+> **Milestone**: None (completed v1.1)
+
+---
+## Archived Milestone 1.1 (Analytical Engine)
 
 ## Must-Haves (Milestone 1.1)
 - [x] Backend extracts or calculates Call Sum, Put Sum, Difference, Call Boundary, Put Boundary, Call ITM, Put ITM, PCR.
