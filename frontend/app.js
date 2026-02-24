@@ -14,6 +14,12 @@ async function init() {
         await populateSymbols();
     } else {
         const scripts = JSON.parse(savedScripts);
+
+        // Render initial skeletons
+        scripts.forEach(script => {
+            updateOrBuildCard(script.symbol, {});
+        });
+
         await postConfig(scripts);
         connectWebSocket();
     }
@@ -37,6 +43,11 @@ function setupUIBindings() {
 
         // Clear dashboard visual
         document.getElementById('dashboard-container').innerHTML = '';
+
+        // Render skeletons
+        scripts.forEach(script => {
+            updateOrBuildCard(script.symbol, {});
+        });
 
         await postConfig(scripts);
 
@@ -139,6 +150,7 @@ function connectWebSocket() {
         if (payload.type === "update" && payload.data) {
             for (const [symbol, data] of Object.entries(payload.data)) {
                 if (Object.keys(data).length > 0) {
+                    console.log(`[WebSocket] Incoming "${symbol}" | History Ticks: ${data.history ? data.history.length : 0} | PCR: ${data.analytics?.pcr}`);
                     updateOrBuildCard(symbol, data);
 
                     if (openDetailSymbol === symbol) {
@@ -176,6 +188,8 @@ function updateOrBuildCard(symbol, data) {
         void card.offsetWidth; // Trigger DOM reflow to restart animation
         card.classList.add("flash");
     }
+
+    if (!data || Object.keys(data).length === 0) return;
 
     let tableRows = '';
     if (data.options_data && Array.isArray(data.options_data)) {
