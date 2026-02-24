@@ -1,7 +1,30 @@
 # ROADMAP.md
 
 > **Current Phase**: Not started
-> **Milestone**: v1.0
+> **Milestone**: v1.1 (Analytical Engine)
+
+## Must-Haves (Milestone 1.1)
+- [ ] Backend extracts or calculates Call Sum, Put Sum, Difference, Call Boundary, Put Boundary, Call ITM, Put ITM, PCR.
+- [ ] Backend tracks the historical points throughout the day as a time-series.
+- [ ] Frontend displays the time-series logs in a table view.
+- [ ] Frontend displays the Bullish/Bearish layout matching the old GUI (Open Interest Boundaries, Call/Put Exits, etc).
+
+## Phases (Milestone 1.1)
+
+### Phase 1: Analytical Model & Time-Series State
+**Status**: ⬜ Not Started
+**Objective**: Update the backend data processor to calculate sum boundaries, differences, PCR, and ITM metrics using the original script's offset logics based on the ATM strike. Initialize a state history manager to keep track of these records over the session.
+
+### Phase 2: Analytics Data Streaming
+**Status**: ⬜ Not Started
+**Objective**: Enhance the WebSocket broadcast payload to carry both the live option chain frame and the historical analytics arrays for the user's active symbols.
+
+### Phase 3: GUI Analytics Dashboard
+**Status**: ⬜ Not Started
+**Objective**: Implement the bottom table log and the summary indicator panel for Open Interest Boundaries, PCR, and Market Exits.
+
+---
+## Archived Milestone 1.0 (Web Dashboard)
 
 ## Must-Haves (from SPEC)
 - [ ] Users can select and view at least 5 different option chains on a single webpage via a summary view dashboard.
