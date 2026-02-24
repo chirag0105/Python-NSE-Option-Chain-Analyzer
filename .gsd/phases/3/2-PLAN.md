@@ -1,57 +1,51 @@
 ---
 phase: 3
 plan: 2
-wave: 2
+wave: 1
 ---
 
-# Plan 3.2: Configuration State & WebSockets (Vanilla JS)
+# Plan 3.2: Implementing the Historical Data Chart Table
 
 ## Objective
-Implement LocalStorage synchronization to retain chosen symbols and build a Vanilla JS WebSocket client mapping incoming streaming data into HTML cards.
+Convert the stored chronological `analytics` points arrays inside the new websocket `data.history` into a visual time-series table that updates directly inside the frontend's expanded chain view to fully match the GUI.
 
 ## Context
-- .gsd/ROADMAP.md
-- .gsd/phases/3/RESEARCH.md
-- frontend/index.html
-- backend/routers.py
+- `frontend/index.html` - Detail Modal body.
+- `frontend/app.js` - `updateDetailModalLive` logic loop.
 
 ## Tasks
 
-<task type="manual">
-  <name>State Setup and LocalStorage Manager</name>
+<task type="auto">
+  <name>Build the Historical Table View Skeleton</name>
   <files>
-    - frontend/app.js
+    <file>frontend/index.html</file>
   </files>
   <action>
-    - Build an initialization function `document.addEventListener("DOMContentLoaded", init)`.
-    - `init()` reads `localStorage.getItem("tracked_scripts")`.
-    - If `null` or `[]`, display the setup modal via `document.getElementById('setup-modal').classList.remove('hidden')`.
-    - Fetch from `/api/symbols`, populating checkboxes in the modal for available Index or Equity tracking.
-    - Submit button creates a JSON `[{"symbol": "NIFTY", "type": "index"}]`, saves to `localStorage`, and runs `fetch('/api/config', {method: 'POST'...})`, then hides modal and connects WebSocket.
-    - If localStorage data exists, immediately POST and connect without showing the modal.
+    Add a new `<div class="history-container">` wrapping a newly created `<table>` block inside the nested Detail Modal structure (likely above the raw options-chain table, identical to how the original Tkinter app placed the streaming Log layout first, then the Option Parameters secondly).
+    The Headers of this table must track: `Time, Value, Call Sum, Put Sum, Difference, Call Boundary, Put Boundary, Call ITM, Put ITM`.
+    Create a `<tbody id="history-table-body">` to hook into via JS.
   </action>
-  <verify>python -c "import os; print(os.path.exists('frontend/app.js'))"</verify>
-  <done>Clients correctly bootstrap their settings persistently on reload without bugging the backend config state constantly.</done>
+  <verify>grep -q "history-table-body" frontend/index.html</verify>
+  <done>History log layout exists dynamically inside the detail-modal.</done>
 </task>
 
-<task type="manual">
-  <name>WebSocket Broadcast Parsing & UI Reactivity</name>
+<task type="auto">
+  <name>Populate Time-Series Log and Coloring</name>
   <files>
-    - frontend/app.js
+    <file>frontend/app.js</file>
   </files>
   <action>
-    - Inside `app.js`, create a constant `ws = new WebSocket("ws://" + window.location.host + "/api/ws")`.
-    - Inside `ws.onmessage = function(event)`, parse the incoming JSON payload which matches the `data_manager.latest_chains` dictionary structure.
-    - Write a function `updateOrBuildCard(symbol, payload)` checking if `document.getElementById('card-' + symbol)` exists.
-    - If not, `.createElement('div')`, add premium glassmorphism `.card` classes, and `.appendChild()` it to `document.getElementById('dashboard-container')`.
-    - Parse the payload: Extract `underlyingValue` into a vibrant `.price` span (green for up, red down relative tracking if desired, simple white for now). Output the top 5 `options_data` strikes.
-    - Implement a smooth `class.add('flash')` animation natively handling updates for real-time visual polling triggers so it's visibly apparent numbers changed.
+    Inside `updateDetailModalLive`, map the `data.history` array iteratively to paint rows in the `history-table-body`.
+    1. Parse through the ticks via a `.forEach`
+    2. Format row components tracking the previous tick vs new tick recursively, just like the Python GUI (Lines ~1300-1380).
+       - Ex: if new `underlyingValue` is `> old_underlyingValue`, color the value cell `background: #00e676 (green)`, else `#e53935 (red)`.
+       - Similarly apply the Green/Red cell shading conditionally on `Call Sum`, `Put Sum`, `Difference`, `Boundaries`, `ITMs` comparing `[Tick N]` vs `[Tick N-1]` if it increased/decreased just like Tkinter did visually in the screenshot.
+    3. Fill the table cleanly with the corresponding values tracking the full session session.
   </action>
-  <verify>python -c "import os; print(os.path.exists('frontend/app.js'))"</verify>
-  <done>Frontend reacts dynamically to WebSocket messages gracefully inserting Vanilla HTML string replacements across target specific Node IDs efficiently.</done>
+  <verify>grep -q "history-table-body" frontend/app.js</verify>
+  <done>Frontend logic now renders the full dynamic log layout iterating over the historical data array and correctly color blocks increases vs decreases cell-by-cell.</done>
 </task>
 
 ## Success Criteria
-- [ ] Local storage holds and restores dashboard environments upon browser refreshes.
-- [ ] WebSocket streaming correctly transforms the page DOM asynchronously without refreshing.
-- [ ] Visual indicator animations (CSS flashing) successfully fire upon incoming data loops.
+- [ ] Visual history table identically mirrors the running background polling output shown in the top half of the original application GUI screenshot.
+- [ ] Users can track momentum shifts and PCR differences through clearly colored cell indicators dynamically mapping their underlying values.
