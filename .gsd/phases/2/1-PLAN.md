@@ -4,55 +4,33 @@ plan: 1
 wave: 1
 ---
 
-# Plan 2.1: WebSocket Connection Manager
+# Plan 2.1: Verify Data Streaming & Frontend Parsing
 
 ## Objective
-Implement native WebSockets in FastAPI to manage active connections and broadcast updates down to the frontend dashboard.
+The backend's `DataManager` caching natively broadcasts the entire `history` block and live `analytics` payload due to the WebSocket streaming `latest_chains` as its core dump logic in `main.py`. This plan validates that the frontend successfully parses this updated structural payload through WebSockets without breaking the current UI.
 
 ## Context
-- .gsd/ROADMAP.md
-- .gsd/phases/2/RESEARCH.md
-- backend/routers.py
+- `backend/main.py` -> `manager.broadcast` logic
+- `frontend/app.js` (Lines ~148-161) -> `ws.onmessage` event listener.
+- We need to capture and log the `history` and `analytics` arrays safely as they land.
 
 ## Tasks
 
 <task type="auto">
-  <name>Create WebSocketManager Class</name>
+  <name>Validate Frontend WebSocket Intake</name>
   <files>
-    - backend/websocket_manager.py
+    <file>frontend/app.js</file>
   </files>
   <action>
-    - Define a `ConnectionManager` class.
-    - Inside, hold a list `self.active_connections: List[WebSocket] = []`.
-    - Implement `async def connect(self, websocket: WebSocket): await websocket.accept(); self.active_connections.append(websocket)`.
-    - Implement `def disconnect(self, websocket: WebSocket): self.active_connections.remove(websocket)`.
-    - Implement `async def broadcast(self, message: dict): [await connection.send_json(message) for connection in self.active_connections]`.
-    - Instantiate a singleton `manager = ConnectionManager()`.
+    Inside `ws.onmessage` in `frontend/app.js`:
+    1. During the loop `for (const [symbol, data] of Object.entries(payload.data))`, add a simple `console.log` specifically for debugging that reads:
+       `console.log(\`[WebSocket] Incoming "\${symbol}" | History Ticks: \${data.history ? data.history.length : 0} | PCR: \${data.analytics?.pcr}\`);`
+    2. Confirm that the dashboard successfully continues tracking `underlyingValue` (LTP) alongside printing this debug message.
   </action>
-  <verify>python -c "from fastapi import WebSocket"</verify>
-  <done>ConnectionManager is implemented with full capability to maintain states and broadcast dictionaries.</done>
-</task>
-
-<task type="auto">
-  <name>Expose /api/ws Endpoint</name>
-  <files>
-    - backend/routers.py
-    - backend/websocket_manager.py
-    - backend/data_manager.py
-  </files>
-  <action>
-    - In `routers.py`, import `WebSocket`, `WebSocketDisconnect` from fastapi.
-    - Import the singleton `manager` from `websocket_manager.py`.
-    - Create a `@api_router.websocket("/ws")` router catching WebSocket requests.
-    - Initialize the connection via `await manager.connect(websocket)`.
-    - Automatically send the current state of `data_manager.latest_chains` down to the client immediately upon connection so they don't have to wait for the next polling interval.
-    - Maintain an infinite loop `while True: await websocket.receive_text()` to keep the connection open, with a standard `except WebSocketDisconnect` breaking the loop and calling `manager.disconnect(websocket)`.
-  </action>
-  <verify>python -c "import fastapi"</verify>
-  <done>The `/api/ws` endpoint successfully allows clients to connect and pushes immediate cache state.</done>
+  <verify>grep -q "History Ticks" frontend/app.js</verify>
+  <done>Frontend logic now actively reports the size of the historical time-series buffer and explicit analytics metrics without halting execution rendering.</done>
 </task>
 
 ## Success Criteria
-- [ ] Websocket manager holds a list of active open socket descriptors.
-- [ ] Connectors are correctly dropped upon disconnection gracefully.
-- [ ] Clients receive the initial cached array upon the first connect.
+- [ ] Browser `console.log` successfully reports the `history` length growing over time.
+- [ ] WebSocket connections remain stable despite the larger nested object payloads sent every N seconds.
