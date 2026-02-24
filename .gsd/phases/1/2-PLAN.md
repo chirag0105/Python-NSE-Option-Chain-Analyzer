@@ -4,48 +4,34 @@ plan: 2
 wave: 1
 ---
 
-# Plan 1.2: NSE API Client
+# Plan 1.2: Historical Time-Series State Manager
 
 ## Objective
-Establish `NSEClient` using `httpx` and `asyncio` to reliably fetch raw Option Chain Data without 401 Unauthorized errors from NSE boundaries.
+The old GUI accumulated rows in a continuous table showing the analytical values over time. To emulate this, the backend needs to store an array of these `analytics` snapshots in memory for each active symbol, rather than just retaining the latest snapshot.
 
 ## Context
-- .gsd/SPEC.md
-- .gsd/ARCHITECTURE.md
-- .gsd/phases/1/RESEARCH.md
+- `backend/data_manager.py` — Currently only stores the latest processed chain.
+- Requirements — Provide a `history` array representing continuous points in time for each requested symbol, limited to the current market day session.
 
 ## Tasks
 
 <task type="auto">
-  <name>Initialize NSEClient</name>
+  <name>Implement Time Series Retention</name>
   <files>
-    - backend/nse_client.py
+    <file>backend/data_manager.py</file>
   </files>
   <action>
-    - Ensure `httpx` request library handles `brotli` content correctly since NSE uses it.
-    - Create an asynchronous singleton/client `NSEClient` class that initializes an `httpx.AsyncClient`.
-    - Setup default User-Agent headers mirroring a real browser (AppleWebKit/Gecko/Chrome) and standard accept languages.
-    - Set up a class property that handles requesting the base page `https://www.nseindia.com/` first and saving returned cookies safely to the `AsyncClient` to fake a browser session properly.
+    Update `DataManager.update_chain()`:
+    1. Create a dictionary that initializes an empty array `analytics_history[symbol]` when a symbol is observed.
+    2. Extract the `analytics` dictionary and `timestamp` from the newly processed `chain_data`.
+    3. Construct a snapshot `{ "timestamp": chain["timestamp"], "underlyingValue": chain["underlyingValue"], "analytics": chain["analytics"] }`.
+    4. Append this snapshot to `analytics_history[symbol]`.
+    5. Modify `update_chain` to attach the full history timeline `analytics_history[symbol]` into the `chain_data["history"]` attribute before it gets saved into `self.latest_chains[symbol]`.
   </action>
-  <verify>python -c "import httpx"</verify>
-  <done>Client class wraps `httpx.AsyncClient` securely and extracts cookies from the NSE homepage.</done>
-</task>
-
-<task type="auto">
-  <name>Fetch Symbols and Data API requests</name>
-  <files>
-    - backend/nse_client.py
-  </files>
-  <action>
-    - Add async `fetch_indices_master` returning the list of available indices.
-    - Add async `fetch_equities_master` returning available stocks.
-    - Add async `fetch_option_chain(symbol, type="index")` passing data against `https://www.nseindia.com/api/option-chain-indices?symbol={symbol}` or `equities?symbol={symbol}`.
-    - Catch failures/401s specifically with an error log indicating session regeneration is needed.
-  </action>
-  <verify>python -c "import httpx"</verify>
-  <done>Asynchronous methods return the un-processed Option Chain nested JSON accurately.</done>
+  <verify>python test_processor.py</verify>
+  <done>The output processed payload contains `history` with historical entries of analytical data objects in chronological order.</done>
 </task>
 
 ## Success Criteria
-- [ ] Cookies correctly initialized and saved off NSE baseline.
-- [ ] Core endpoints defined for API fetching returning raw Option Chain Dictionary mappings.
+- [ ] Each chain object generated and delivered by the API includes the accrued history.
+- [ ] Historical snapshots bundle timestamp, underlying value, and analytical fields together accurately.
