@@ -11,10 +11,9 @@ class NSEClient:
     API_EQUITIES = "https://www.nseindia.com/api/option-chain-equities"
     
     HEADERS = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "application/json, text/plain, */*",
-        "Accept-Language": "en-US,en;q=0.9",
-        "Accept-Encoding": "gzip, deflate, br",
+        'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Safari/537.36',
+        'accept-language': 'en,gu;q=0.9,hi;q=0.8',
+        'accept-encoding': 'gzip, deflate, br'
     }
 
     def __init__(self):
@@ -24,10 +23,12 @@ class NSEClient:
     async def initialize_session(self):
         """Fetch the homepage to generate required cookies for the API routing."""
         try:
-            response = await self.client.get(self.BASE_URL)
-            response.raise_for_status()
+            # Drop previous cookies
+            self.client.cookies.clear()
+            # Hit option-chain directly as the gateway instead of the main page
+            response = await self.client.get(f"{self.BASE_URL}/option-chain")
             self._session_initialized = True
-            logger.info("NSE session initialized successfully via homepage.")
+            logger.info("NSE session initialized successfully via option-chain page.")
         except Exception as e:
             logger.error(f"Failed to initialize NSE session: {e}")
             self._session_initialized = False
@@ -52,22 +53,27 @@ class NSEClient:
             logger.error(f"HTTP error during NSE API call: {e}")
             raise
 
-    async def fetch_indices_master(self):
-        """Fetch list of available indices from NSE."""
-        return await self._request_with_retry(f"{self.BASE_URL}/api/equity-master")
+    async def fetch_underlying_information(self):
+        """Fetch list of available indices and stocks from NSE."""
+        return await self._request_with_retry(f"{self.BASE_URL}/api/underlying-information")
 
-    async def fetch_equities_master(self):
-        """Fetch list of available stock equities from NSE."""
-        return await self._request_with_retry(f"{self.BASE_URL}/api/equity-stock")
+    async def fetch_contract_info(self, symbol: str):
+        """Fetch the contract info for a given symbol to get its expiry dates."""
+        return await self._request_with_retry(f"{self.BASE_URL}/api/option-chain-contract-info", params={"symbol": symbol})
 
     async def fetch_option_chain(self, symbol: str, type_val: str = "index"):
         """Fetch the option chain for a given symbol. type_val must be 'index' or 'stock'"""
-        if type_val == "index":
-            url = self.API_INDICES
-        else:
-            url = self.API_EQUITIES
+        # NSE's V3 API requires an explicit expiry date to return data
+        contract_info = await self.fetch_contract_info(symbol)
+        if not contract_info or "expiryDates" not in contract_info or not contract_info["expiryDates"]:
+            return {}
             
-        params = {"symbol": symbol}
+        closest_expiry = contract_info["expiryDates"][0]
+        
+        url = f"{self.BASE_URL}/api/option-chain-v3"
+        type_param = "Indices" if type_val == "index" else "Equity"
+        params = {"type": type_param, "symbol": symbol, "expiry": closest_expiry}
+        
         return await self._request_with_retry(url, params=params)
 
     async def close(self):

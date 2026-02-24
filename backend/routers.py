@@ -23,8 +23,15 @@ async def update_config(new_config: AppConfig):
 
 @api_router.get("/symbols")
 async def get_symbols():
-    indices = await nse_client.fetch_indices_master()
-    equities = await nse_client.fetch_equities_master()
+    try:
+        data = await nse_client.fetch_underlying_information()
+        indices = [item['symbol'] for item in data['data']['IndexList']]
+        equities = [item['symbol'] for item in data['data']['UnderlyingList']]
+    except Exception as e:
+        # Fallback list if the API fails or layout drifts
+        indices = ["NIFTY", "BANKNIFTY", "FINNIFTY", "MIDCPNIFTY"]
+        equities = ["RELIANCE", "TCS", "HDFCBANK", "INFY"]
+
     return {
         "indices": indices,
         "equities": equities

@@ -4,15 +4,15 @@
 > **Milestone**: v1.1 (Analytical Engine)
 
 ## Must-Haves (Milestone 1.1)
-- [ ] Backend extracts or calculates Call Sum, Put Sum, Difference, Call Boundary, Put Boundary, Call ITM, Put ITM, PCR.
-- [ ] Backend tracks the historical points throughout the day as a time-series.
+- [x] Backend extracts or calculates Call Sum, Put Sum, Difference, Call Boundary, Put Boundary, Call ITM, Put ITM, PCR.
+- [x] Backend tracks the historical points throughout the day as a time-series.
 - [ ] Frontend displays the time-series logs in a table view.
 - [ ] Frontend displays the Bullish/Bearish layout matching the old GUI (Open Interest Boundaries, Call/Put Exits, etc).
 
 ## Phases (Milestone 1.1)
 
 ### Phase 1: Analytical Model & Time-Series State
-**Status**: ⬜ Not Started
+**Status**: ✅ Complete
 **Objective**: Update the backend data processor to calculate sum boundaries, differences, PCR, and ITM metrics using the original script's offset logics based on the ATM strike. Initialize a state history manager to keep track of these records over the session.
 
 ### Phase 2: Analytics Data Streaming
