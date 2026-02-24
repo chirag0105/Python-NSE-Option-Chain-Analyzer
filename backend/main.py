@@ -2,6 +2,7 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from backend.routers import api_router
 from backend.config_manager import ConfigManager
 from backend.data_manager import data_manager
@@ -53,3 +54,5 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="NSE Option Chain Analyzer API", lifespan=lifespan)
 app.include_router(api_router, prefix="/api")
+
+app.mount("/", StaticFiles(directory="frontend", html=True), name="static")

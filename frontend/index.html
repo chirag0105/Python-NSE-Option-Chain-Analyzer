@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSE Option Chain Analyzer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>NSE Option Analyzer</h1>
+            <button id="configure-btn" class="btn">Configure Symbols</button>
+        </header>
+
+        <main id="dashboard-container" class="dashboard-grid">
+            <!-- Cards will be dynamically injected here via JS -->
+        </main>
+
+        <div id="setup-modal" class="modal hidden">
+            <div class="modal-content glass-panel">
+                <h2>Select Symbols to Track</h2>
+                <div class="modal-body">
+                    <div class="symbol-section">
+                        <h3>Indices</h3>
+                        <div id="indices-list" class="checkbox-grid"></div>
+                    </div>
+                    <div class="symbol-section">
+                        <h3>Equities</h3>
+                        <div id="equities-list" class="checkbox-grid"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="save-config-btn" class="btn primary-btn">Save Configuration</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Empty js file for now -->
+    <script src="app.js"></script>
+</body>
+</html>
