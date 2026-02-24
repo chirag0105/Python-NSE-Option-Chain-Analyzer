@@ -1,7 +1,9 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from backend.config_manager import ConfigManager
 from backend.models import AppConfig
 from backend.nse_client import nse_client
+from backend.websocket_manager import manager
+from backend.data_manager import data_manager
 
 api_router = APIRouter()
 
@@ -27,3 +29,16 @@ async def get_symbols():
         "indices": indices,
         "equities": equities
     }
+
+@api_router.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await manager.connect(websocket)
+    try:
+        # Immediately send the currently cached data to the newly connected client
+        await websocket.send_json({"type": "update", "data": data_manager.latest_chains})
+        
+        # Keep connection open and listen for potential messages (if future needed)
+        while True:
+            data = await websocket.receive_text()
+    except WebSocketDisconnect:
+        manager.disconnect(websocket)
