@@ -1,239 +1,226 @@
 <img width="128" height="128" src="https://i.imgur.com/OGHZnUu.png" alt="icon_square">
 
-# Python-NSE-Option-Chain-Analyzer
+# NSE Option Chain Analyzer — Web Edition
 
-## [Downloads](https://github.com/VarunS2002/Python-NSE-Option-Chain-Analyzer/releases)
-
-[![Latest: v5.7](https://img.shields.io/badge/release-v5.7-brightgreen)](https://github.com/VarunS2002/Python-NSE-Option-Chain-Analyzer/releases/download/5.7/NSE_Option_Chain_Analyzer_5.7.exe)
-![Download-Count](https://img.shields.io/github/downloads/VarunS2002/Python-NSE-Option-Chain-Analyzer/total?color=blue)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-For doing technical analysis for option traders, the Option Chain is the most important tool for deciding entry and exit
-strategies. The National Stock Exchange (NSE) has a website which displays the option chain for traders in near
-real-time. This program retrieves this data from the NSE site and then generates useful analysis of the Option Chain for
-the specified Index or Stock. It also continuously refreshes the Option Chain and visually displays the trend in various
-indicators useful for Technical Analysis. Calculations are based
-on [Mr. Sameer Dharaskar's Course](http://advancesharetrading.com/).
+A modern, real-time web dashboard for analyzing NSE Option Chains — rebuilt from the original Python/Tkinter desktop app into a FastAPI + Vanilla JS web application with live WebSocket streaming, multi-symbol tracking, and a full analytical engine.
 
-## [Changelog](https://github.com/VarunS2002/Python-NSE-Option-Chain-Analyzer/blob/master/CHANGELOG.md)
+---
 
-## Disclaimer:
+## ✨ What's New (Web Version)
 
-> #### This software is an unofficial software and is not affiliated with / endorsed or approved by the National Stock Exchange (NSE) or Mr. Sameer Dharaskar in any way
+| Feature | Desktop (Tkinter) | Web Edition |
+|---|---|---|
+| Multi-symbol tracking | ❌ Single symbol | ✅ Track 5+ simultaneously |
+| Real-time updates | Polling loop | ⚡ WebSocket push |
+| Summary dashboard | ❌ | ✅ At-a-glance cards |
+| Expanded detail view | Single window | ✅ Full modal with chain + analytics |
+| Historical time-series | ✅ Table | ✅ Color-coded table with trend indicators |
+| Analytics indicators | ✅ Labels | ✅ Dynamic Bullish/Bearish panels |
+| Cross-platform | Windows only (.exe) | ✅ Any browser, any OS |
+| Installation | Download + run | `pip install` + one command |
+
+---
+
+## Disclaimer
+
+> **This software is unofficial and is not affiliated with / endorsed or approved by the National Stock Exchange (NSE) or Mr. Sameer Dharaskar in any way.**
 >
->#### This is purely an enthusiast program intended for educational purposes only and is not financial advice
+> **This is purely an enthusiast program intended for educational purposes only and is not financial advice.**
 >
->#### By downloading this software you acknowledge that you are using this at your own risk and that I am is not responsible for any damages that may occur to you due to the usage or installation of this program
+> **By using this software you acknowledge that you are using this at your own risk and that the authors are not responsible for any damages that may occur due to the usage of this program.**
 >
->#### All NSE name/symbols are owned by the National Stock Exchange
+> **All NSE names/symbols are owned by the National Stock Exchange.**
+
+---
+
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Python 3.9+
+- pip
+
+### Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/VarunS2002/Python-NSE-Option-Chain-Analyzer.git
+cd Python-NSE-Option-Chain-Analyzer
 
-## Installation:
+# Install dependencies
+pip install -r requirements.txt
+```
 
-> ### Supported platforms:
+### Running
 
-- Windows
-- Linux
-- macOS
+```bash
+python -m uvicorn backend.main:app --reload
+```
 
-> #### Method 1 (Windows only):
+Open your browser to **[http://localhost:8000](http://localhost:8000)**
 
-- Download the `.exe` (Windows Executable) file
+---
 
-- Run it directly
+## 📖 Usage
 
-> #### Method 2:
+1. **Configure Symbols** — Click the "Configure Symbols" button in the top-right corner
+2. **Select Indices or Equities** — Check the symbols you want to monitor (e.g. NIFTY, BANKNIFTY, RELIANCE)
+3. **Save** — The dashboard immediately begins streaming live data via WebSocket
+4. **View Summary Cards** — Each symbol gets a card displaying its current option chain snapshot
+5. **Expand Detail View** — Click any symbol name to open the full analytics modal with:
+   - Historical time-series log (color-coded trends)
+   - Full option chain grid (Call OI, LTP, Strike, Put LTP, Put OI)
+   - Analytical indicators panel (OI status, PCR, Boundaries, ITM, Exits)
 
-- Requirements:
-    - Python 3.6+
-    - Additional steps for Linux:
-        - `apt-get install python3-tk`
-        - `apt install python3-pip`
-    - For Windows and macOS https://www.python.org/downloads/ is recommended
+---
 
-- Download the `.py` (Python Source Code) file
+## 🏗️ Architecture
 
-- Required
-  modules: [requirements.txt](https://github.com/VarunS2002/Python-NSE-Option-Chain-Analyzer/blob/master/requirements.txt)
+```
+Python-NSE-Option-Chain-Analyzer/
+├── backend/
+│   ├── main.py                 # FastAPI app, lifespan, background poller
+│   ├── routers.py              # API endpoints + WebSocket handler
+│   ├── nse_client.py           # HTTP/2 client for NSE API with session mgmt
+│   ├── data_processor.py       # Analytical engine (PCR, Boundaries, ITM, Exits)
+│   ├── data_manager.py         # In-memory cache + time-series history
+│   ├── websocket_manager.py    # WebSocket connection manager + broadcast
+│   ├── config_manager.py       # Persists user config to config.json
+│   └── models.py               # Pydantic data models
+├── frontend/
+│   ├── index.html              # Dashboard structure + detail modal
+│   ├── style.css               # Dark theme, glassmorphism, responsive grid
+│   └── app.js                  # WebSocket client, DOM rendering, analytics binding
+├── config.json                 # User configuration (tracked symbols, interval)
+└── requirements.txt            # Python dependencies
+```
+
+### Data Flow
 
-- Install missing modules using `pip install -r requirements.txt`
+```
+NSE API ──► nse_client.py ──► data_processor.py ──► data_manager.py ──► WebSocket ──► Browser
+              (HTTP/2)         (Analytics calc)      (Cache + History)    (Push)       (Live render)
+```
 
-> #### Note: Alternate implementations of Python and/or alternate methods of installation may also be supported
+1. **Background Poller** (`main.py`) runs on a configurable interval (default: 60s)
+2. **NSE Client** fetches raw option chain data with proper session/cookie management
+3. **Data Processor** calculates all analytical metrics around the ATM strike
+4. **Data Manager** caches the latest state + appends to a rolling 500-entry history per symbol
+5. **WebSocket Manager** broadcasts the full payload to all connected clients
+6. **Frontend** renders cards, populates detail modals, and color-codes historical trends
 
-## Usage:
+---
 
-1. Set Index Mode or Stock Mode
+## 📊 Data & Analytics
 
-2. Select your Index or Stock
+### Option Chain Table
 
-3. Select it's Expiry Date
+| Column | Description |
+|--------|-------------|
+| Call OI | Call Open Interest (with change in OI) |
+| Call LTP | Call Last Traded Price |
+| Strike | Strike Price (ATM highlighted) |
+| Put LTP | Put Last Traded Price |
+| Put OI | Put Open Interest (with change in OI) |
 
-4. Enter your preferred Strike Price
+### Analytical Indicators
 
-5. Set the interval you want the program to refresh (Optional : Defaults to 1 minute)
+| Indicator | Description |
+|-----------|-------------|
+| **Open Interest** | Bullish (green) if Put Sum > Call Sum, Bearish (red) if Call Sum ≥ Put Sum |
+| **PCR** | Put-Call Ratio = Total Put OI / Total Call OI. Green if ≥ 1, Red if < 1 |
+| **Call Boundary** | Change in Call OI 2 strikes above ATM. Indicates if Call writers are entering (+ve, bearish) or exiting (-ve, bullish) |
+| **Put Boundary** | Change in Put OI at ATM. Indicates if Put writers are entering (+ve, bullish) or exiting (-ve, bearish) |
+| **Call ITM** | Ratio of Put/Call writing 4 strikes above ATM. If > 1.5, bullish signal |
+| **Put ITM** | Ratio of Call/Put writing 2 strikes below ATM. If > 1.5, bearish signal |
+| **Call Exits** | "Yes" if any of the 3 Call OI changes (ATM, ATM+1, ATM+2) are negative |
+| **Put Exits** | "Yes" if any of the 3 Put OI changes (ATM, ATM+1, ATM+2) are negative |
 
-6. Click Start
+### Historical Time-Series Table
 
-## Notes:
+Each row represents a polling snapshot with color-coded cells:
+- 🟢 **Green** — Value increased from previous tick
+- 🔴 **Red** — Value decreased from previous tick
 
-- If there is an error in fetching dates on login screen then try refreshing
+Columns tracked: Time, Underlying Value, Call Sum, Put Sum, Difference, Call Boundary, Put Boundary, Call ITM, Put ITM
 
-- If there is an error in fetching dates on main screen then try stopping and again starting from option menu
+Calculations are based on [Mr. Sameer Dharaskar's Course](http://advancesharetrading.com/).
 
-- If you face any issue or have a suggestion then feel free to open an issue.
+---
 
-- It is recommended to enable logging and then send the `NSE-OCA.log` file or the console output for reporting issues
+## ⚙️ Configuration
 
-- In case of network or connection errors the program doesn't crash and will keep retrying until manually stopped
+The app persists configuration to `config.json`:
 
-- If a `ZeroDivisionError` occurs or some data doesn't exist the value of the variable will be defaulted to `0`
+```json
+{
+  "tracked_scripts": [
+    {"symbol": "NIFTY", "type": "index"},
+    {"symbol": "BANKNIFTY", "type": "index"}
+  ],
+  "refresh_interval": 60
+}
+```
 
-- Set `load_nse_icon` option to `False` in the configuration file to prevent downloading the NSE icon in the `.py`
-  version to speed up loading time
+| Field | Description | Default |
+|-------|-------------|---------|
+| `tracked_scripts` | Array of symbols to monitor | `[]` |
+| `refresh_interval` | Polling interval in seconds | `60` |
 
-- If an `Incorrect Strike Price` error message is displayed and the strike price you entered is correct then check
-  whether the NSE website is loading the data properly before creating an issue
+---
 
-## Features:
+## 🔌 API Endpoints
 
-- The program continuously retrieves and refreshes the option chain giving near real-time analysis to the traders
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/health` | Health check |
+| `GET` | `/api/config` | Get current configuration |
+| `POST` | `/api/config` | Update tracked symbols and interval |
+| `GET` | `/api/symbols` | List available indices and equities |
+| `GET` | `/api/chain/{symbol}` | Get latest cached chain for a symbol |
+| `WS` | `/api/ws` | WebSocket endpoint for real-time updates |
 
-- New data rows are added only if the NSE server updates its time or data (To prevent displaying duplicate data)
+---
 
-- Supported Indices and
-  Stocks: https://www.nseindia.com/products-services/equity-derivatives-list-underlyings-information
+## 📦 Dependencies
 
-- Option Chain data source: https://www.nseindia.com/option-chain
+| Package | Purpose |
+|---------|---------|
+| [FastAPI](https://fastapi.tiangolo.com/) | Web framework and API routing |
+| [Uvicorn](https://www.uvicorn.org/) | ASGI server |
+| [httpx](https://www.python-httpx.org/) | HTTP/2 async client for NSE API |
+| [Pydantic](https://docs.pydantic.dev/) | Data validation and settings |
+| [websockets](https://websockets.readthedocs.io/) | WebSocket protocol support |
+| [Brotli](https://pypi.org/project/Brotli/) | Decoding compressed NSE responses |
 
-- Supports multiple instances with different indices/stocks and/or strike prices selected
+---
 
-- Red and Green colour indication for data based on trends
+## 🗂️ Version History
 
-- Toast Notifications for notifying when trend changes (Windows 10 and 11 only). Notified changes:
-    * Open Interest: Bullish/Bearish
-    * Open Interest Upper Boundary Strike Prices: Change in Value
-    * Open Interest Lower Boundary Strike Prices: Change in Value
-    * Call Exits: Yes/No
-    * Put Exits: Yes/No
-    * Call ITM: Yes/No
-    * Put ITM: Yes/No
+| Version | Description |
+|---------|-------------|
+| **v1.1** | Analytical Engine — PCR, Boundaries, ITM, Exits, Historical time-series, Color-coded dashboard |
+| **v1.0** | Web Dashboard — Multi-symbol tracking, WebSocket streaming, Summary cards, Detail modal |
+| **v5.7** (Desktop) | Original Tkinter desktop application |
 
-- Program title format: `NSE-Option-Chain-Analyzer - {index/stock} - {expiry_date} - {strike_price}`
+---
 
-- Stop and Start manually
+## 🤝 Contributing
 
-- You can select all table data using Ctrl+A or select individual cells, rows and columns
+Feel free to open issues or submit pull requests. For major changes, please open an issue first to discuss what you would like to change.
 
-- Then you can copy it using Ctrl+C or right click menu
+---
 
-- You can then paste it in any spreadsheet application (Tested with MS Excel and Google Sheets)
+## 📝 License
 
-- Export table data to `.csv` file
+[GNU General Public License v3.0](https://www.gnu.org/licenses/gpl-3.0)
 
-- Real time exporting data rows to `.csv` file
+---
 
-- Dumping entire Option Chain data to a `.csv` file
+## 🙏 Credits
 
-- Auto stop the program at 3:30pm when the market closes
-
-- Alert if the last time the data from the server was updated is 5 minutes or more
-
-- Auto Checking for updates
-
-- Debug Logging
-
-- Saves certain settings in a configuration file for subsequent runs. Saved Settings:
-    * Load App Icon
-    * Index/Stock Mode
-    * Selected Index
-    * Selected Stock
-    * Refresh Interval
-    * Live Export
-    * Notifications
-    * Dump entire Option Chain
-    * Auto stop at 3:30pm
-    * Warn Late Server Updates
-    * Auto Check for Updates
-    * Debug Logging
-
-- Keyboard shortcuts for all options
-
-## Data Displayed
-
-> #### Table Data:
-
-| Data                   | Description                                                                                                                                                                                                                                                                             |
-|------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Server Time            | Indicates last data update time by NSE server                                                                                                                                                                                                                                           |
-| Value                  | Underlying Instrument Value indicates the value of the underlying Security or Index                                                                                                                                                                                                     |
-| Call Sum               | Calculated. Sum of the Changes in Call Open Interest contracts of the given Strike Price and the next immediate two Strike Prices (In Thousands for Index Mode and Tens for Stock Mode)                                                                                                 |
-| Put Sum                | Calculated. Sum of the Change in Put Open Interest contracts of the given Strike Price and the next two Strike Prices (In Thousands for Index Mode and Tens for Stock Mode)                                                                                                             |
-| Difference             | Calculated. Difference between the Call Sum and Put Sum. If it's very -ve it's bullish, if it's very +ve then it's bearish else it's a sideways session.                                                                                                                                |
-| Call Boundary          | Change in Call Open Interest contracts for 2 Strike Prices above the given Strike Price. This is used to determine if Call writers are taking new positions (Bearish) or exiting their positions (Bullish). (In Thousands for Index Mode and Tens for Stock Mode)                       |
-| Put Boundary           | Change in Put Open Interest for the given Strike Price. This is used to determine if Put writers are taking new positions (Bullish) or exiting their positions(Bearish). (In Thousands for Index Mode and Tens for Stock Mode)                                                          |
-| Call In The Money(ITM) | This indicates that bullish trend could continue and Value could cross 4 Strike Prices above given Strike Price. It's calculated as the ratio of Put writing and Call writing at the 4th Strike Price above the given Strike price. If the absolute ratio > 1.5 then it's bullish sign. |
-| Put In The Money(ITM)  | This indicates that bearish trend could continue and Value could cross 2 Strike Prices below given Strike Price. It's calculated as the ratio of Call writing and Put writing at the 2nd Strike Price below the given Strike price. If the absolute ratio > 1.5 then it's bearish sign. |
-
-> #### Label Data:
-
-| Data                         | Description                                                                                                                                                                                                                                                                                                                                                                                                                 |
-|------------------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Open Interest Upper Boundary | Highest and 2nd Highest(highest in OI boundary range) Call Open Interest contracts (In Thousands for Index Mode and Tens for Stock Mode) and their corresponding Strike Prices                                                                                                                                                                                                                                              |
-| Open Interest Lower Boundary | Highest and 2nd Highest(highest in OI boundary range) Put Open Interest contracts (In Thousands for Index Mode and Tens for Stock Mode) and their corresponding Strike Prices                                                                                                                                                                                                                                               |
-| Open Interest                | This indicates if the latest OI data record indicates Bearish or Bullish signs near Indicated Strike Price. If the Call Sum is more than the Put Sum then the OI is considered Bearish as there is more Call writing than Puts. If the Put Sum is more than the Call sum then the OI Is considered Bullish as the Put writing exceeds the Call writing.                                                                     |
-| Put Call Ratio(PCR)          | Sum Total of Put Open Interest contracts divided by Sum Total of Call Open Interest contracts                                                                                                                                                                                                                                                                                                                               |
-| Call Exits                   | This indicates if the Call writers are exiting near given Strike Price in the latest OI data record. If the Call sum is < 0 or if the change in Call OI at the Call boundary (2 Strike Prices above the given Strike Price) is < 0, then Call writers are exiting their positions and the Bulls have a clear path.                                                                                                          |
-| Put Exits                    | This indicates if the Put writers are exiting near given Strike Price in the latest OI data record. If the Put sum is < 0 or if the change in Put OI at the Put boundary (the given Strike Price) is < 0, then Put writers are exiting their positions and the Bears have a clear path.                                                                                                                                     |
-| Call In The Money(ITM)       | This indicates if the Call writers are also exiting far OTM strike prices (4 Strike Prices above the given Strike Price) showing extreme bullishness. Conditions are if the Call writers are exiting their far OTM positions and the Put writers are writing at the same Strike Price & if the absolute ratio > 1.5 then it's bullish sign. This signal also changes to Yes if the change in Call OI at the far OTM is < 0. |
-| Put In The Money(ITM)        | This indicates if the Put writers are also exiting far OTM strike prices (2 Strike Prices below the given Strike Price) showing extreme bearishness. Conditions are if the Put writers are exiting their far OTM positions and the Call writers are writing at the same Strike Price & if the absolute ratio > 1.5 then it's a bearish sign. This signal also changes to Yes if the change in Put OI at the far OTM is < 0. |
-
-## Screenshots:
-
-- Login Page:
-
-  <br>![Login_Window](https://i.imgur.com/x3leqmZ.png) <br><br>
-
-- Main Window Index Mode:
-
-  <br>![Main_Window_Index](https://i.imgur.com/ZFQCxCK.png) <br><br>
-
-- Main Window Stock Mode:
-
-  <br>![Main_Window_Stock](https://i.imgur.com/qd8CLol.png) <br><br>
-
-- Selecting Data:
-
-  <br>![Selecting_Data](https://i.imgur.com/zOjptS2.png) <br><br>
-
-- Option Menu:
-
-  <br>![Option_Menu](https://i.imgur.com/CocgjbN.png) <br><br>
-
-- Toast Notifications (Windows 10 and 11 only):
-
-  <br>![Notification](https://i.imgur.com/d3Fokxo.png) <br><br>
-
-## Dependencies:
-
-- [auto-py-to-exe](https://pypi.org/project/auto-py-to-exe/) is used for compiling the program to a .exe file
-
-- [pandas](https://pypi.org/project/pandas/) is used for storing and manipulating the data
-
-- [requests](https://pypi.org/project/requests/) is used for accessing and retrieving data from the NSE website
-
-- [brotli](https://pypi.org/project/brotli/) is used for decoding data received from the NSE website
-
-- [stream-to-logger](https://pypi.org/project/streamtologger/) is used for debug logging
-
-- [tksheet](https://pypi.org/project/tksheet/) is used for the table containing the data
-
-- [win10toast](https://pypi.org/project/win10toast/) is used for toast notifications on Windows 10 and 11
-
-## Contributors:
-
-- [medknecth](https://github.com/medknecth/)
-
-- [Sangram2905](https://github.com/Sangram2905/)
-
-- [yjagota](https://github.com/yjagota/)
-
-- [QuickLearner171998](https://github.com/QuickLearner171998/)
+- Original desktop application by [VarunS2002](https://github.com/VarunS2002)
+- Calculations based on [Mr. Sameer Dharaskar's Course](http://advancesharetrading.com/)
+- Contributors: [medknecth](https://github.com/medknecth/), [Sangram2905](https://github.com/Sangram2905/), [yjagota](https://github.com/yjagota/), [QuickLearner171998](https://github.com/QuickLearner171998/)
